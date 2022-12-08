@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32414.318
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Devameet_CSharp", "Devameet_CSharp\Devameet_CSharp.csproj", "{6CB789E0-1101-4CF6-924F-34DAED5D9D92}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6CB789E0-1101-4CF6-924F-34DAED5D9D92}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6CB789E0-1101-4CF6-924F-34DAED5D9D92}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6CB789E0-1101-4CF6-924F-34DAED5D9D92}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6CB789E0-1101-4CF6-924F-34DAED5D9D92}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4BA2D34F-EE9D-4A7E-BF9E-D19FA404E50F}
+	EndGlobalSection
+EndGlobal
