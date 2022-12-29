@@ -20,6 +20,9 @@ var connectionstring = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<DevameetContext>(option => option.UseSqlServer(connectionstring));
 
 builder.Services.AddScoped<IUserRepository, UserRepositoryImpl>();
+builder.Services.AddScoped<IMeetRepository, MeetRepositoryImpl>();
+builder.Services.AddScoped<IRoomRepository, RoomRepositoryImpl>();
+builder.Services.AddScoped<IMeetObjectRepository, MeetObjectRepositoryImpl>();
 
 var chaveCriptografia = Encoding.ASCII.GetBytes(JWTKey.SecretKey);
 builder.Services.AddAuthentication(auth =>
@@ -49,6 +52,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

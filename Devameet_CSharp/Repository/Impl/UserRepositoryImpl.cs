@@ -20,5 +20,22 @@ namespace Devameet_CSharp.Repository.Impl
         {
             return _context.Users.FirstOrDefault(u => u.Email == email && u.Password == password);
         }
+
+        public void Save(User user)
+        {
+            _context.Add(user);
+            _context.SaveChanges();
+        }
+
+        public void UpdateUser(User user)
+        {
+            _context.Update(user);
+            _context.SaveChanges();
+        }
+
+        public bool VerifyEmail(string email)
+        {
+            return _context.Users.Any(u => u.Email == email);
+        }
     }
 }
