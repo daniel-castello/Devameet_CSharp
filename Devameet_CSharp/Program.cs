@@ -1,4 +1,5 @@
 using Devameet_CSharp;
+using Devameet_CSharp.Controllers;
 using Devameet_CSharp.Models;
 using Devameet_CSharp.Repository;
 using Devameet_CSharp.Repository.Impl;
@@ -6,6 +7,10 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using SocketIOSharp.Server;
+using Newtonsoft.Json.Linq;
+using SocketIOSharp.Common;
+using Devameet_CSharp.Dtos;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,20 +47,109 @@ builder.Services.AddAuthentication(auth =>
     };
 });
 
-var app = builder.Build();
+#region Websocket
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+SocketIOServer server = new SocketIOServer(new SocketIOServerOption(9001));
+
+server.OnConnection((socket) =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    Console.WriteLine("Client connected!");
+
+    socket.On("join", (data) => // IdUser, link
+    {
+
+        foreach (JToken token in data)
+        {
+            JoinSocketDto requestJson = token.ToObject<JoinSocketDto>();
+
+            Console.Write(requestJson.IdUser.ToString() + " - " + requestJson.Link); 
+
+        }
+
+        JoinSocketDto teste = new JoinSocketDto();
+
+        socket.Emit("lista de usuarios ativos", teste); // emite a lista de usuários conectados na room inclusive você
+
+        
+    });
+
+    socket.On("move", (data) => // IdUser, link ,x,y ,orientation
+    {
+        foreach (JToken token in data)
+        {
+            Console.Write(token + " ");
+        }
+        socket.Emit("lista de usuarios ativos", data); // emite a lista de usuários atualizados na room inclusive você
+    });
+
+    socket.On("handleDisconnect", (data) => // clientId 
+    {
+        foreach (JToken token in data)
+        {
+            Console.Write(token + " ");
+        }
+        // disconnecta o cliente da sala
+        socket.Dispose();
+    });
+
+    socket.On("toggl-mute-use", (data) => //IdUser, link, muted
+    {
+        foreach (JToken token in data)
+        {
+            Console.Write(token + " ");
+        }
+        socket.Emit("lista de usuarios ativos", data); // emite a lista de usuários conectados na room inclusive você
+    });
+
+    socket.On("call-user", (data) => //clientId, ClientIdToSend, RTCOffer
+    {
+        foreach (JToken token in data)
+        {
+            Console.Write(token + " ");
+        }
+        socket.Emit("lista de usuarios ativos", data); // emite a call-made para o client especifico com a offer e o seu id
+    });
+
+    socket.On("make-aswner", (data) => //clientId, ClientIdToSend, RTCAsnwer
+    {
+        foreach (JToken token in data)
+        {
+            Console.Write(token + " "); 
+        }
+        socket.Emit("lista de usuarios ativos", data); // emite a call-made para o client especifico com a offer e o seu id
+    });
+
+
+    socket.On(SocketIOEvent.DISCONNECT, () =>
+    {
+        Console.WriteLine("Client disconnected!");
+    });
+
+});
+
+#endregion Websocket
+
+server.Start();
+
+Console.WriteLine("Input /exit to exit program.");
+string line;
+
+while (!(line = Console.ReadLine())?.Trim()?.ToLower()?.Equals("/exit") ?? false)
+{
+    server.Emit("echo", line);
 }
+
+var app = builder.Build();
 
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+app.UseWebSockets();
+
+
 
 app.MapControllers();
 

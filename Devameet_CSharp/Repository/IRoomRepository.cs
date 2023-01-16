@@ -2,5 +2,6 @@
 {
     public interface IRoomRepository
     {
+        string GetRoom(string msg);
     }
 }
