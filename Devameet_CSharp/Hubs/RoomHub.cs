@@ -91,4 +91,14 @@ public class RoomHub : Hub
         var users = await _roomRepository.ListUsersPosition(link);
         await Clients.Group(link).SendAsync($"update-user-list", new { Users=users });
     }
+    
+    public async Task CallUser(CallUserDto dto)
+    {
+        await Clients.Client(dto.To).SendAsync("call-made", new { Offer = dto.Offer, Socket = ClientId });
+    }
+    
+    public async Task MakeAnswer(MakeAnswerDto dto)
+    {
+        await Clients.Client(dto.To).SendAsync("answer-made", new { Answer = dto.Answer, Socket = ClientId });
+    }
 }
