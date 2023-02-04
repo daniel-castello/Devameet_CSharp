@@ -57,7 +57,7 @@ public class RoomHub : Hub
             var updatePositionDto = new UpdatePositionDto();
             updatePositionDto.X = 2;
             updatePositionDto.Y = 2;
-            updatePositionDto.Orientation = "bottom";
+            updatePositionDto.Orientation = "down";
             
             await _roomRepository.UpdateUserPosition(userId, link, ClientId, updatePositionDto);
             var users = await _roomRepository.ListUsersPosition(link);
@@ -67,5 +67,20 @@ public class RoomHub : Hub
             await Clients.OthersInGroup(link).SendAsync($"add-user", new {  User=ClientId });
             Console.WriteLine("Sent to client!");
         }
+    }
+    
+    public async Task Move(MoveDto dto)
+    {
+        var userId = Int32.Parse(dto.UserId);
+        var link = dto.Link;
+        
+        var updatePositionDto = new UpdatePositionDto();
+        updatePositionDto.X = dto.X;
+        updatePositionDto.Y = dto.Y;
+        updatePositionDto.Orientation = dto.Orientation;
+        
+        await _roomRepository.UpdateUserPosition(userId, link, ClientId, updatePositionDto);
+        var users = await _roomRepository.ListUsersPosition(link);
+        await Clients.Group(link).SendAsync($"update-user-list", new { Users=users });
     }
 }
