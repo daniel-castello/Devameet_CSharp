@@ -1,5 +1,4 @@
 using Devameet_CSharp;
-using Devameet_CSharp.Controllers;
 using Devameet_CSharp.Models;
 using Devameet_CSharp.Repository;
 using Devameet_CSharp.Repository.Impl;
@@ -7,10 +6,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using SocketIOSharp.Server;
-using Newtonsoft.Json.Linq;
-using SocketIOSharp.Common;
-using Devameet_CSharp.Dtos;
+using Devameet_CSharp.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +24,19 @@ builder.Services.AddScoped<IUserRepository, UserRepositoryImpl>();
 builder.Services.AddScoped<IMeetRepository, MeetRepositoryImpl>();
 builder.Services.AddScoped<IRoomRepository, RoomRepositoryImpl>();
 builder.Services.AddScoped<IMeetObjectRepository, MeetObjectRepositoryImpl>();
+
+builder.Services.AddSignalR();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("ClientPermission", policy =>
+    {
+        policy.AllowAnyHeader()
+            .AllowAnyMethod()
+            .WithOrigins("http://localhost:3000")
+            .AllowCredentials();
+    });
+});
 
 var chaveCriptografia = Encoding.ASCII.GetBytes(JWTKey.SecretKey);
 builder.Services.AddAuthentication(auth =>
@@ -47,101 +56,103 @@ builder.Services.AddAuthentication(auth =>
     };
 });
 
-#region Websocket
+// #region Websocket
 
-SocketIOServer server = new SocketIOServer(new SocketIOServerOption(9001));
+// SocketIOServer server = new SocketIOServer(new SocketIOServerOption(9001));
+//
+// server.OnConnection((socket) =>
+// {
+//     Console.WriteLine("Client connected!");
+//
+//     socket.On("join", (data) => // IdUser, link
+//     {
+//
+//         foreach (JToken token in data)
+//         {
+//             JoinSocketDto requestJson = token.ToObject<JoinSocketDto>();
+//
+//             Console.Write(requestJson.IdUser.ToString() + " - " + requestJson.Link); 
+//
+//         }
+//
+//         JoinSocketDto teste = new JoinSocketDto();
+//
+//         socket.Emit("lista de usuarios ativos", teste); // emite a lista de usuï¿½rios conectados na room inclusive vocï¿½
+//
+//         
+//     });
+//
+//     socket.On("move", (data) => // IdUser, link ,x,y ,orientation
+//     {
+//         foreach (JToken token in data)
+//         {
+//             Console.Write(token + " ");
+//         }
+//         socket.Emit("lista de usuarios ativos", data); // emite a lista de usuï¿½rios atualizados na room inclusive vocï¿½
+//     });
+//
+//     socket.On("handleDisconnect", (data) => // clientId 
+//     {
+//         foreach (JToken token in data)
+//         {
+//             Console.Write(token + " ");
+//         }
+//         // disconnecta o cliente da sala
+//         socket.Dispose();
+//     });
+//
+//     socket.On("toggl-mute-use", (data) => //IdUser, link, muted
+//     {
+//         foreach (JToken token in data)
+//         {
+//             Console.Write(token + " ");
+//         }
+//         socket.Emit("lista de usuarios ativos", data); // emite a lista de usuï¿½rios conectados na room inclusive vocï¿½
+//     });
+//
+//     socket.On("call-user", (data) => //clientId, ClientIdToSend, RTCOffer
+//     {
+//         foreach (JToken token in data)
+//         {
+//             Console.Write(token + " ");
+//         }
+//         socket.Emit("lista de usuarios ativos", data); // emite a call-made para o client especifico com a offer e o seu id
+//     });
+//
+//     socket.On("make-aswner", (data) => //clientId, ClientIdToSend, RTCAsnwer
+//     {
+//         foreach (JToken token in data)
+//         {
+//             Console.Write(token + " "); 
+//         }
+//         socket.Emit("lista de usuarios ativos", data); // emite a call-made para o client especifico com a offer e o seu id
+//     });
+//
+//
+//     socket.On(SocketIOEvent.DISCONNECT, () =>
+//     {
+//         Console.WriteLine("Client disconnected!");
+//     });
+//
+// });
+//
+// #endregion Websocket
 
-server.OnConnection((socket) =>
-{
-    Console.WriteLine("Client connected!");
+// server.Start();
 
-    socket.On("join", (data) => // IdUser, link
-    {
+// Console.WriteLine("Input /exit to exit program.");
+// string line;
 
-        foreach (JToken token in data)
-        {
-            JoinSocketDto requestJson = token.ToObject<JoinSocketDto>();
-
-            Console.Write(requestJson.IdUser.ToString() + " - " + requestJson.Link); 
-
-        }
-
-        JoinSocketDto teste = new JoinSocketDto();
-
-        socket.Emit("lista de usuarios ativos", teste); // emite a lista de usuários conectados na room inclusive você
-
-        
-    });
-
-    socket.On("move", (data) => // IdUser, link ,x,y ,orientation
-    {
-        foreach (JToken token in data)
-        {
-            Console.Write(token + " ");
-        }
-        socket.Emit("lista de usuarios ativos", data); // emite a lista de usuários atualizados na room inclusive você
-    });
-
-    socket.On("handleDisconnect", (data) => // clientId 
-    {
-        foreach (JToken token in data)
-        {
-            Console.Write(token + " ");
-        }
-        // disconnecta o cliente da sala
-        socket.Dispose();
-    });
-
-    socket.On("toggl-mute-use", (data) => //IdUser, link, muted
-    {
-        foreach (JToken token in data)
-        {
-            Console.Write(token + " ");
-        }
-        socket.Emit("lista de usuarios ativos", data); // emite a lista de usuários conectados na room inclusive você
-    });
-
-    socket.On("call-user", (data) => //clientId, ClientIdToSend, RTCOffer
-    {
-        foreach (JToken token in data)
-        {
-            Console.Write(token + " ");
-        }
-        socket.Emit("lista de usuarios ativos", data); // emite a call-made para o client especifico com a offer e o seu id
-    });
-
-    socket.On("make-aswner", (data) => //clientId, ClientIdToSend, RTCAsnwer
-    {
-        foreach (JToken token in data)
-        {
-            Console.Write(token + " "); 
-        }
-        socket.Emit("lista de usuarios ativos", data); // emite a call-made para o client especifico com a offer e o seu id
-    });
-
-
-    socket.On(SocketIOEvent.DISCONNECT, () =>
-    {
-        Console.WriteLine("Client disconnected!");
-    });
-
-});
-
-#endregion Websocket
-
-server.Start();
-
-Console.WriteLine("Input /exit to exit program.");
-string line;
-
-while (!(line = Console.ReadLine())?.Trim()?.ToLower()?.Equals("/exit") ?? false)
-{
-    server.Emit("echo", line);
-}
+// while (!(line = Console.ReadLine())?.Trim()?.ToLower()?.Equals("/exit") ?? false)
+// {
+//     server.Emit("echo", line);
+// }
 
 var app = builder.Build();
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
+
+app.UseCors("ClientPermission");
 
 app.UseAuthentication();
 
@@ -152,5 +163,7 @@ app.UseWebSockets();
 
 
 app.MapControllers();
+
+app.MapHub<RoomHub>("/roomHub");
 
 app.Run();
