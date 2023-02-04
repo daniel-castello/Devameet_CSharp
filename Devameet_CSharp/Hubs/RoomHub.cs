@@ -83,4 +83,12 @@ public class RoomHub : Hub
         var users = await _roomRepository.ListUsersPosition(link);
         await Clients.Group(link).SendAsync($"update-user-list", new { Users=users });
     }
+    
+    public async Task TogglMuteUser(ToggleMuteDto dto)
+    {
+        var link = dto.Link;
+        await _roomRepository.UpdateUserMute(dto);
+        var users = await _roomRepository.ListUsersPosition(link);
+        await Clients.Group(link).SendAsync($"update-user-list", new { Users=users });
+    }
 }

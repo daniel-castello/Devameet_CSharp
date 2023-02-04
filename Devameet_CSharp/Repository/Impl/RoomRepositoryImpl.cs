@@ -91,9 +91,9 @@ namespace Devameet_CSharp.Repository.Impl
         {
             
             var meet = await _context.Meets.Where(m => m.Link == dto.Link).FirstAsync();
-            var user = await _context.Users.Where(u => u.Id == dto.UserId).FirstAsync();
+            var user = await _context.Users.Where(u => u.Id == Int32.Parse(dto.UserId)).FirstAsync();
             var room = await _context.Rooms.Where(r => r.MeetId == meet.Id && r.UserId == user.Id).FirstAsync();
-            room.Muted = dto.Mute;
+            room.Muted = dto.Muted;
             await _context.SaveChangesAsync();
         }
     }
