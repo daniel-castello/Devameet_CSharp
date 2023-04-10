@@ -12,5 +12,6 @@ namespace Devameet_CSharp.Models
         public DbSet<MeetObjects> MeetObjects { get; set; }
         public DbSet<Room> Rooms { get; set; }
 
+
     }
 }
